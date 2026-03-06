@@ -9,6 +9,9 @@ namespace OrderService.Api.Controllers;
 public class OrdersController(IOrderService orderService, ILogger<OrdersController> logger) : ControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(typeof(OrderResponse), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
     public async Task<IActionResult> GetOrders() //TODO: Implement pagination
     {
         logger.LogInformation("Getting orders.");
@@ -23,6 +26,9 @@ public class OrdersController(IOrderService orderService, ILogger<OrdersControll
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(OrderResponse), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
     public async Task<IActionResult> CreateOrders(OrderRequest request) 
     {
         logger.LogInformation("Creating order for customer:{CustomerEmail}", request.CustomerEmail);

@@ -19,10 +19,10 @@ internal class OrderRepository : IOrderRepository
         return await _context.Orders.AsNoTracking().ToListAsync();
     }
 
-    public async Task<int> CreateOrder(Order order)
+    public async Task<Order> CreateOrder(Order order)
     {
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
-        return order.OrderId;
+        return order;
     }
 }
