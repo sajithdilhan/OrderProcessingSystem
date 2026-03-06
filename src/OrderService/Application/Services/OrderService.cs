@@ -1,6 +1,5 @@
 ﻿using MassTransit;
 using OrderService.Application.Dto;
-using OrderService.Application.Extensions;
 using OrderService.Application.Interfaces;
 using Shared.Contracts.Common;
 using Shared.Contracts.Events;
@@ -20,7 +19,7 @@ public class OrderService(IOrderRepository orderRepository, IPublishEndpoint pub
         }
 
         logger.LogInformation("Returning orders.");
-        var dtos = orders.Select(o => o.ToResponse());
+        var dtos = orders.Select(p => OrderResponse.ToDto(p));
         return Result<IEnumerable<OrderResponse>>.Success(dtos);
     }
 

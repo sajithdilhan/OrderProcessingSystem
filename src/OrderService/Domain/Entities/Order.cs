@@ -24,5 +24,6 @@ public class Order
 
         Amount = amount;
         CustomerEmail = email;
+        OrderDate = DateTime.UtcNow;
     }
 }

@@ -9,7 +9,6 @@ public class OrderResponse
 
     public decimal Amount { get; set; }
 
-    [EmailAddress]
     public string CustomerEmail { get; set; } = string.Empty;
 
     public static OrderResponse ToDto(Order order)

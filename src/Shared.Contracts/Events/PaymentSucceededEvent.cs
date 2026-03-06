@@ -1,10 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Shared.Contracts.Events;
 
-namespace Shared.Contracts.Events
-{
-    internal class PaymentSucceededEvent
-    {
-    }
-}
+public record PaymentSucceededEvent(int PaymentId, decimal Amount, int OrderId, DateTime PaymentDate);
