@@ -40,6 +40,27 @@
     - Store notification data in an in-memory database.
     - Listen to `PaymentSucceededEvent` event on payment creation.
 4. Shared.Contracts Library
-    - Define common models for User and Order.
-    - Define event models for `UserCreated` and `OrderCreated`.
-    - Implement Kafka producer and consumer utilities.
+    - Define common contracts for the services.
+    - Define event models for `OrderCreatedEvent` and `PaymentSucceededEvent`.
+  
+## Trade-offs
+1. Used in-memory database instead of a persistent database for simplicity and ease of setup.
+2. Kept all services in a single repository for easier review, though in real-world scenarios, they would be in separate repositories.
+3. Limited error handling and validation to essential checks to keep the implementation straightforward.
+4. Used basic logging instead of a full-fledged logging framework for simplicity.
+  
+## Setup Instructions
+
+### Prerequisites
+- **.NET 8 SDK** 
+- **Docker Desktop**
+- **Git**
+
+### Steps to Run the Application
+
+----- To be filled
+
+## Resources 
+- ChatGPT 
+- Github Copilot
+- Youtube
