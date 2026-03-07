@@ -5,7 +5,7 @@ using OrderService.Infrastructure.Persistent;
 
 namespace OrderService.Infrastructure.Repositories;
 
-internal class OrderRepository : IOrderRepository
+public class OrderRepository : IOrderRepository
 {
     private readonly OrdersDbContext _context;
 
