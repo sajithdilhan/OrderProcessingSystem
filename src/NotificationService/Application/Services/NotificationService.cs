@@ -24,8 +24,11 @@ public class NotificationService(INotificationRepository notificationRepository,
         return Result<IEnumerable<NotificationResponse>>.Success(dtos);
     }
 
-    public Task<bool> SendNotification(Notification notification)
+    public async Task SendNotification(Notification notification)
     {
-        throw new NotImplementedException();
+        await notificationRepository.SaveNotification(notification);
+        logger.LogInformation("Notification saved to repository with ID: {NotificationId}", notification.NotificationId);
+        logger.LogInformation("Sending notification: {Message}", notification.Message);
+        await Task.CompletedTask;
     }
 }

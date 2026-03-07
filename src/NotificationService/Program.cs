@@ -33,9 +33,10 @@ builder.Services.AddMassTransit(x =>
                      h.Username(rabbitSettings.Username);
                      h.Password(rabbitSettings.Password);
                  });
-        cfg.ReceiveEndpoint("notification-service.payment-created", e => e.ConfigureConsumer<PaymentSucceededEventConsumer>(context));
+        cfg.ReceiveEndpoint("notification-service.payment-succeeded", e => e.ConfigureConsumer<PaymentSucceededEventConsumer>(context));
     });
 });
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -57,5 +58,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

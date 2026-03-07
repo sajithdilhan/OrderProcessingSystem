@@ -3,66 +3,65 @@ using Shared.Contracts.Common;
 using System.Net;
 using System.Text.Json;
 
-namespace OrderService.Api.Middleware
+namespace OrderService.Api.Middleware;
+
+public class ExceptionMiddleware
 {
-    public class ExceptionMiddleware
+    private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionMiddleware> _logger;
+
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
+        _next = next;
+        _logger = logger;
+    }
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+    public async Task InvokeAsync(HttpContext context)
+    {
+        try
         {
-            _next = next;
-            _logger = logger;
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch (Exception ex)
         {
-            try
-            {
-                await _next(context);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled exception caught in middleware");
-                await HandleExceptionAsync(context, ex);
-            }
+            _logger.LogError(ex, "Unhandled exception caught in middleware");
+            await HandleExceptionAsync(context, ex);
         }
+    }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
+    {
+        context.Response.ContentType = "application/json";
+
+        var statusCode = ex switch
         {
-            context.Response.ContentType = "application/json";
+            ArgumentNullException => HttpStatusCode.BadRequest,
+            InvalidOperationException => HttpStatusCode.BadRequest,
+            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+            OrderValidationException => HttpStatusCode.BadRequest,
+            _ => HttpStatusCode.InternalServerError
+        };
 
-            var statusCode = ex switch
-            {
-                ArgumentNullException => HttpStatusCode.BadRequest,
-                InvalidOperationException => HttpStatusCode.BadRequest,
-                UnauthorizedAccessException => HttpStatusCode.Unauthorized,
-                OrderValidationException => HttpStatusCode.BadRequest,
-                _ => HttpStatusCode.InternalServerError
-            };
+        var message = statusCode switch
+        {
+            HttpStatusCode.BadRequest => ex.Message,
+            HttpStatusCode.NotFound => "Resource not found.",
+            HttpStatusCode.Conflict => "Resource conflict.",
+            HttpStatusCode.Unauthorized => "Unauthorized access.",
+            _ => "An unexpected error occurred! Please try again later."
+        };
 
-            var message = statusCode switch
-            {
-                HttpStatusCode.BadRequest => ex.Message,
-                HttpStatusCode.NotFound => "Resource not found.",
-                HttpStatusCode.Conflict => "Resource conflict.",
-                HttpStatusCode.Unauthorized => "Unauthorized access.",
-                _ => "An unexpected error occurred! Please try again later."
-            };
+        var problem = new ApiProblemDetails
+        {
+            Title = "Unexpected error!",
+            Status = (int)statusCode,
+            Detail = message,
+            Instance = context.Request.Path
+        };
 
-            var problem = new ApiProblemDetails
-            {
-                Title = "Unexpected error!",
-                Status = (int)statusCode,
-                Detail = message,
-                Instance = context.Request.Path
-            };
+        context.Response.StatusCode = problem.Status;
+        context.Response.ContentType = "application/problem+json";
 
-            context.Response.StatusCode = problem.Status;
-            context.Response.ContentType = "application/problem+json";
-
-            await context.Response.WriteAsync(JsonSerializer.Serialize(problem));
-        }
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problem));
     }
 }

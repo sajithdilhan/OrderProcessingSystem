@@ -1,15 +1,13 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/NotificationService/NotificationService.csproj" Id="6b95e069-5ddc-4d0a-841a-34a7cda94df5" />
+    <Project Path="src/NotificationService/NotificationService.csproj" />
     <Project Path="src/OrderService/OrderService.csproj" />
-    <Project Path="src/PaymentService/PaymentService.csproj" Id="f9a8ba04-d76d-4ab6-af26-a5414aa9d638" />
-    <Project Path="src/Shared.Contracts/Shared.Contracts.csproj" Id="34b9d660-8855-4083-8cfb-6b75127a71a0">
-      <Build Solution="Debug|*" Project="false" />
-    </Project>
+    <Project Path="src/PaymentService/PaymentService.csproj" />
+    <Project Path="src/Shared.Contracts/Shared.Contracts.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/NotificationServiceTests/NotificationServiceTests.csproj" Id="95e3e5b9-7862-47b0-83b6-1aea3cd13dbc" />
-    <Project Path="tests/OrderServiceTests/OrderServiceTests.csproj" Id="ed2846f1-7650-4f1d-bf04-ff507239f3e9" />
-    <Project Path="tests/PaymentServiceTests/PaymentServiceTests.csproj" Id="09c16d17-ba9c-4a33-94d5-f4cecafa952e" />
+    <Project Path="tests/NotificationServiceTests/NotificationServiceTests.csproj" />
+    <Project Path="tests/OrderServiceTests/OrderServiceTests.csproj" />
+    <Project Path="tests/PaymentServiceTests/PaymentServiceTests.csproj" />
   </Folder>
 </Solution>

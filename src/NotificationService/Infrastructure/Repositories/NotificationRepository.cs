@@ -15,15 +15,15 @@ public class NotificationRepository : INotificationRepository
         _context = context;
     }
 
-    public async Task<Notification> CreateNotification(Notification notification)
+    public async Task<IEnumerable<Notification>> GetAllNotifications()
+    {
+       return await _context.Notifications.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<Notification> SaveNotification(Notification notification)
     {
         _context.Notifications.Add(notification);
         await _context.SaveChangesAsync();
         return notification;
-    }
-
-    public async Task<IEnumerable<Notification>> GetAllNotifications()
-    {
-       return await _context.Notifications.AsNoTracking().ToListAsync();
     }
 }

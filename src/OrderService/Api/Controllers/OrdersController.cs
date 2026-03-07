@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrderService.Application.Dto;
 using OrderService.Application.Interfaces;
+using System.Text.Json;
 
 namespace OrderService.Api.Controllers;
 
@@ -31,7 +32,7 @@ public class OrdersController(IOrderService orderService, ILogger<OrdersControll
     [ProducesResponseType(500)]
     public async Task<IActionResult> CreateOrders(OrderRequest request) 
     {
-        logger.LogInformation("Creating order for customer:{CustomerEmail}", request.CustomerEmail);
+        logger.LogInformation("Creating order :{Order}", JsonSerializer.Serialize(request));
         var result = await orderService.CreateOrder(request);
 
         if (!result.IsSuccess)

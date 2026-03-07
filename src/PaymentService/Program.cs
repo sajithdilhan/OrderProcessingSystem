@@ -36,6 +36,7 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("payment-service.order-created", e => e.ConfigureConsumer<OrderCreatedEventConsumer>(context));
     });
 });
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -57,5 +58,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
