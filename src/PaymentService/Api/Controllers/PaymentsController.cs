@@ -15,7 +15,7 @@ public class PaymentsController(IPaymentService paymentService, ILogger<Payments
     public async Task<IActionResult> GetPayments() //TODO: Implement pagination
     {
         logger.LogInformation("Getting payments.");
-        var result = await paymentService.GetAllPayments();
+        var result = await paymentService.GetAllPaymentsAsync();
 
         if (!result.IsSuccess)
         {

@@ -20,7 +20,7 @@ public class OrdersControllerTests
         };
 
         var mockService = new Mock<IOrderService>();
-        mockService.Setup(s => s.GetAllOrders()).ReturnsAsync(Result<IEnumerable<OrderResponse>>.Success(orders));
+        mockService.Setup(s => s.GetAllOrdersAsync()).ReturnsAsync(Result<IEnumerable<OrderResponse>>.Success(orders));
 
         var mockLogger = new Mock<ILogger<OrdersController>>();
         var controller = new OrdersController(mockService.Object, mockLogger.Object);
@@ -39,7 +39,7 @@ public class OrdersControllerTests
         // Arrange
         var error = new Error(404, "Not found");
         var mockService = new Mock<IOrderService>();
-        mockService.Setup(s => s.GetAllOrders()).ReturnsAsync(Result<IEnumerable<OrderResponse>>.Failure(error));
+        mockService.Setup(s => s.GetAllOrdersAsync()).ReturnsAsync(Result<IEnumerable<OrderResponse>>.Failure(error));
 
         var mockLogger = new Mock<ILogger<OrdersController>>();
         var controller = new OrdersController(mockService.Object, mockLogger.Object);
@@ -60,7 +60,7 @@ public class OrdersControllerTests
         // Arrange
         var request = new OrderRequest { CustomerEmail = "c@d.com", Amount = 20 };
         var mockService = new Mock<IOrderService>();
-        mockService.Setup(s => s.CreateOrder(request)).ReturnsAsync(Result<int>.Success(123));
+        mockService.Setup(s => s.CreateOrderAsync(request)).ReturnsAsync(Result<int>.Success(123));
 
         var mockLogger = new Mock<ILogger<OrdersController>>();
         var controller = new OrdersController(mockService.Object, mockLogger.Object);
@@ -80,7 +80,7 @@ public class OrdersControllerTests
         var request = new OrderRequest { CustomerEmail = "c@d.com", Amount = 20 };
         var error = new Error(400, "Bad request");
         var mockService = new Mock<IOrderService>();
-        mockService.Setup(s => s.CreateOrder(request)).ReturnsAsync(Result<int>.Failure(error));
+        mockService.Setup(s => s.CreateOrderAsync(request)).ReturnsAsync(Result<int>.Failure(error));
 
         var mockLogger = new Mock<ILogger<OrdersController>>();
         var controller = new OrdersController(mockService.Object, mockLogger.Object);

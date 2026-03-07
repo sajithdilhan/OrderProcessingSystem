@@ -14,6 +14,6 @@ public class OrderCreatedEventConsumer(IPaymentService paymentService, ILogger<O
         var message = context.Message;
         logger.LogInformation("Received OrderCreatedEvent: {Order}", JsonSerializer.Serialize(message));
 
-        await paymentService.ProcessPayment(new Payment(message.Amount, message.OrderId, PaymentStatus.Pending));
+        await paymentService.ProcessPaymentAsync(new Payment(message.Amount, message.OrderId, PaymentStatus.Pending));
     }
 }

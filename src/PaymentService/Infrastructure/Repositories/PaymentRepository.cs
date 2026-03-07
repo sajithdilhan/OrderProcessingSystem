@@ -5,7 +5,7 @@ using PaymentService.Infrastructure.Persistence;
 
 namespace PaymentService.Infrastructure.Repositories;
 
-internal class PaymentRepository : IPaymentRepository
+public class PaymentRepository : IPaymentRepository
 {
     private readonly PaymentsDbContext _context;
 
@@ -14,7 +14,7 @@ internal class PaymentRepository : IPaymentRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Payment>> GetAll()
+    public async Task<IEnumerable<Payment>> GetAllPaymentsAsync()
     {
         return await _context.Payments.AsNoTracking().ToListAsync();
     }

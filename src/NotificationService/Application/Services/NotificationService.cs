@@ -8,7 +8,7 @@ namespace NotificationService.Application.Services;
 
 public class NotificationService(INotificationRepository notificationRepository, ILogger<NotificationService> logger) : INotificationService
 {
-    public async Task<Result<IEnumerable<NotificationResponse>>> GetAllNotifications()
+    public async Task<Result<IEnumerable<NotificationResponse>>> GetAllNotificationsAsync()
     {
         logger.LogInformation("Fetching all notifications");
 
@@ -24,7 +24,7 @@ public class NotificationService(INotificationRepository notificationRepository,
         return Result<IEnumerable<NotificationResponse>>.Success(dtos);
     }
 
-    public async Task SendNotification(Notification notification)
+    public async Task SendNotificationAsync(Notification notification)
     {
         await notificationRepository.SaveNotification(notification);
         logger.LogInformation("Notification saved to repository with ID: {NotificationId}", notification.NotificationId);

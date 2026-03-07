@@ -9,9 +9,9 @@ namespace OrderService.Application.Services;
 
 public class OrderService(IOrderRepository orderRepository, IPublishEndpoint publishEndpoint, ILogger<OrderService> logger) : IOrderService
 {
-    public async Task<Result<IEnumerable<OrderResponse>>> GetAllOrders()
+    public async Task<Result<IEnumerable<OrderResponse>>> GetAllOrdersAsync()
     {
-        var orders = await orderRepository.GetAllOrders();
+        var orders = await orderRepository.GetAllOrdersAsync();
         if (orders is null)
         {
             logger.LogWarning("No orders found!");
@@ -23,10 +23,10 @@ public class OrderService(IOrderRepository orderRepository, IPublishEndpoint pub
         return Result<IEnumerable<OrderResponse>>.Success(dtos);
     }
 
-    public async Task<Result<int>> CreateOrder(OrderRequest request)
+    public async Task<Result<int>> CreateOrderAsync(OrderRequest request)
     {
         var order = OrderRequest.ToOrder(request);
-        order = await orderRepository.CreateOrder(order);
+        order = await orderRepository.CreateOrderAsync(order);
         if (order.OrderId == 0)
         {
             logger.LogError("Failed to create order for customer:{CustomerEmail}", request.CustomerEmail);

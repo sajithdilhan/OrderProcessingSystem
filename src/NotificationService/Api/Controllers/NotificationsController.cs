@@ -16,7 +16,7 @@ public class NotificationsController(INotificationService notificationService, I
     public async Task<IActionResult> GetNotifications() //TODO: Implement pagination
     {
         logger.LogInformation("Getting notifications.");
-        var result = await notificationService.GetAllNotifications();
+        var result = await notificationService.GetAllNotificationsAsync();
 
         if (!result.IsSuccess)
         {

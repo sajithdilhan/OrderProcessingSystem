@@ -6,6 +6,6 @@ namespace NotificationService.Application.Interfaces;
 
 public interface INotificationService
 {
-   Task<Result<IEnumerable<NotificationResponse>>> GetAllNotifications();
-   Task SendNotification(Notification notification);
+   Task<Result<IEnumerable<NotificationResponse>>> GetAllNotificationsAsync();
+   Task SendNotificationAsync(Notification notification);
 }

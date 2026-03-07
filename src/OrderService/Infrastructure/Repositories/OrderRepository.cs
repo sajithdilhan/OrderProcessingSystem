@@ -14,12 +14,12 @@ public class OrderRepository : IOrderRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Order>> GetAllOrders()
+    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
     {
         return await _context.Orders.AsNoTracking().ToListAsync();
     }
 
-    public async Task<Order> CreateOrder(Order order)
+    public async Task<Order> CreateOrderAsync(Order order)
     {
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();

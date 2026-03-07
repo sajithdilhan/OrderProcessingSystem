@@ -11,9 +11,9 @@ namespace PaymentService.Application.Services;
 
 public class PaymentService(IPaymentRepository repository, IPublishEndpoint publishEndpoint, ILogger<PaymentService> logger) : IPaymentService
 {
-    public async Task<Result<IEnumerable<PaymentResponse>>> GetAllPayments()
+    public async Task<Result<IEnumerable<PaymentResponse>>> GetAllPaymentsAsync()
     {
-        var payments = await repository.GetAll();
+        var payments = await repository.GetAllPaymentsAsync();
         if (payments is null)
         {
             logger.LogWarning("No payments found!");
@@ -25,7 +25,7 @@ public class PaymentService(IPaymentRepository repository, IPublishEndpoint publ
         return Result<IEnumerable<PaymentResponse>>.Success(dtos);
     }
 
-    public async Task<bool> ProcessPayment(Payment payment)
+    public async Task<bool> ProcessPaymentAsync(Payment payment)
     {
         await repository.SavePaymentAsync(payment);
         await CallExternalPaymentService(payment);

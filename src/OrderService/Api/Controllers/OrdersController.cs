@@ -16,7 +16,7 @@ public class OrdersController(IOrderService orderService, ILogger<OrdersControll
     public async Task<IActionResult> GetOrders() //TODO: Implement pagination
     {
         logger.LogInformation("Getting orders.");
-        var result = await orderService.GetAllOrders();
+        var result = await orderService.GetAllOrdersAsync();
 
         if (!result.IsSuccess)
         {
@@ -33,7 +33,7 @@ public class OrdersController(IOrderService orderService, ILogger<OrdersControll
     public async Task<IActionResult> CreateOrders(OrderRequest request) 
     {
         logger.LogInformation("Creating order :{Order}", JsonSerializer.Serialize(request));
-        var result = await orderService.CreateOrder(request);
+        var result = await orderService.CreateOrderAsync(request);
 
         if (!result.IsSuccess)
         {

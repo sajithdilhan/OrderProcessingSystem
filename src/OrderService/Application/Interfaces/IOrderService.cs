@@ -5,6 +5,6 @@ namespace OrderService.Application.Interfaces;
 
 public interface IOrderService
 {
-    Task<Result<IEnumerable<OrderResponse>>> GetAllOrders();
-    Task<Result<int>> CreateOrder(OrderRequest request);
+    Task<Result<IEnumerable<OrderResponse>>> GetAllOrdersAsync();
+    Task<Result<int>> CreateOrderAsync(OrderRequest request);
 }

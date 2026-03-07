@@ -3,16 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using OrderService.Application.Dto;
 using OrderService.Application.Interfaces;
-using OrderService.Application.Services;
-using ServiceType = OrderService.Application.Services.OrderService;
 using OrderService.Domain.Entities;
-using Shared.Contracts.Common;
 using Shared.Contracts.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
+using ServiceType = OrderService.Application.Services.OrderService;
 
 namespace OrderServiceTests.Services;
 
@@ -26,7 +19,7 @@ public class OrderServiceUnitTests
         var orders = new List<Order> { order };
 
         var mockRepo = new Mock<IOrderRepository>();
-        mockRepo.Setup(r => r.GetAllOrders()).ReturnsAsync(orders);
+        mockRepo.Setup(r => r.GetAllOrdersAsync()).ReturnsAsync(orders);
 
         var mockPublish = new Mock<IPublishEndpoint>();
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -34,7 +27,7 @@ public class OrderServiceUnitTests
         var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
 
         // Act
-        var result = await service.GetAllOrders();
+        var result = await service.GetAllOrdersAsync();
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -51,7 +44,7 @@ public class OrderServiceUnitTests
     {
         // Arrange
         var mockRepo = new Mock<IOrderRepository>();
-        mockRepo.Setup(r => r.GetAllOrders()).ReturnsAsync((IEnumerable<Order>?)null);
+        mockRepo.Setup(r => r.GetAllOrdersAsync()).ReturnsAsync((IEnumerable<Order>?)null);
 
         var mockPublish = new Mock<IPublishEndpoint>();
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -59,7 +52,7 @@ public class OrderServiceUnitTests
         var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
 
         // Act
-        var result = await service.GetAllOrders();
+        var result = await service.GetAllOrdersAsync();
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -76,7 +69,7 @@ public class OrderServiceUnitTests
         var returnedOrder = new Order(request.Amount, request.CustomerEmail) { OrderId = 0 };
 
         var mockRepo = new Mock<IOrderRepository>();
-        mockRepo.Setup(r => r.CreateOrder(It.IsAny<Order>())).ReturnsAsync(returnedOrder);
+        mockRepo.Setup(r => r.CreateOrderAsync(It.IsAny<Order>())).ReturnsAsync(returnedOrder);
 
         var mockPublish = new Mock<IPublishEndpoint>();
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -84,7 +77,7 @@ public class OrderServiceUnitTests
         var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
 
         // Act
-        var result = await service.CreateOrder(request);
+        var result = await service.CreateOrderAsync(request);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -101,7 +94,7 @@ public class OrderServiceUnitTests
         var createdOrder = new Order(request.Amount, request.CustomerEmail) { OrderId = 5, OrderDate = DateTime.UtcNow };
 
         var mockRepo = new Mock<IOrderRepository>();
-        mockRepo.Setup(r => r.CreateOrder(It.IsAny<Order>())).ReturnsAsync(createdOrder);
+        mockRepo.Setup(r => r.CreateOrderAsync(It.IsAny<Order>())).ReturnsAsync(createdOrder);
 
         var mockPublish = new Mock<IPublishEndpoint>();
         mockPublish.Setup(p => p.Publish(It.IsAny<OrderCreatedEvent>(), default)).Returns(Task.CompletedTask);
@@ -111,7 +104,7 @@ public class OrderServiceUnitTests
         var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
 
         // Act
-        var result = await service.CreateOrder(request);
+        var result = await service.CreateOrderAsync(request);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -126,7 +119,7 @@ public class OrderServiceUnitTests
         var request = new OrderRequest { CustomerEmail = "x@y.com", Amount = 15 };
 
         var mockRepo = new Mock<IOrderRepository>();
-        mockRepo.Setup(r => r.CreateOrder(It.IsAny<Order>())).ThrowsAsync(new Exception("DB error"));
+        mockRepo.Setup(r => r.CreateOrderAsync(It.IsAny<Order>())).ThrowsAsync(new Exception("DB error"));
 
         var mockPublish = new Mock<IPublishEndpoint>();
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -134,6 +127,6 @@ public class OrderServiceUnitTests
         var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => service.CreateOrder(request));
+        await Assert.ThrowsAsync<Exception>(() => service.CreateOrderAsync(request));
     }
 }

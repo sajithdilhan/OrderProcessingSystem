@@ -26,7 +26,7 @@ public class OrderRepositoryTests
         var repo = new OrderRepository(context);
 
         // Act
-        var list = await repo.GetAllOrders();
+        var list = await repo.GetAllOrdersAsync();
 
         // Assert
         Assert.NotNull(list);
@@ -44,7 +44,7 @@ public class OrderRepositoryTests
         var order = new Order(25, "g@h.com");
 
         // Act
-        var created = await repo.CreateOrder(order);
+        var created = await repo.CreateOrderAsync(order);
 
         // Assert
         Assert.NotNull(created);

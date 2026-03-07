@@ -1,0 +1,89 @@
+using Microsoft.EntityFrameworkCore;
+using PaymentService.Domain.Entities;
+using PaymentService.Domain.Validations;
+using PaymentService.Infrastructure.Persistence;
+using PaymentService.Infrastructure.Repositories;
+using Shared.Contracts.Enum;
+
+namespace PaymentServiceTests.Repositories;
+
+public class PaymentRepositoryTests
+{
+    private PaymentsDbContext CreateContext(string dbName)
+    {
+        var options = new DbContextOptionsBuilder<PaymentsDbContext>()
+            .UseInMemoryDatabase(dbName)
+            .Options;
+
+        return new PaymentsDbContext(options);
+    }
+
+    [Fact]
+    public async Task GetAll_ReturnsEmpty_WhenNoPayments()
+    {
+        // Arrange
+        var dbName = $"payments_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new PaymentRepository(context);
+
+        // Act
+        var list = await repo.GetAllPaymentsAsync();
+
+        // Assert
+        Assert.NotNull(list);
+        Assert.Empty(list);
+    }
+
+    [Fact]
+    public async Task SavePaymentAsync_PersistsPaymentAndAssignsId()
+    {
+        // Arrange
+        var dbName = $"payments_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new PaymentRepository(context);
+
+        var payment = new Payment(25, 6);
+
+        // Act
+        var created = await repo.SavePaymentAsync(payment);
+
+        // Assert
+        Assert.NotNull(created);
+        Assert.True(created.PaymentId > 0);
+
+        var fromDb = context.Payments.ToList();
+        Assert.Single(fromDb);
+        Assert.Equal(created.PaymentId, fromDb[0].PaymentId);
+    }
+
+    [Fact]
+    public async Task UpdatePaymentAsync_UpdatesExistingPayment()
+    {
+        // Arrange
+        var dbName = $"payments_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new PaymentRepository(context);
+
+        var payment = new Payment(40, 7);
+        var created = await repo.SavePaymentAsync(payment);
+
+        // Act
+        created.PaymentStatus = PaymentStatus.Completed;
+        var updated = await repo.UpdatePaymentAsync(created);
+
+        // Assert
+        Assert.Equal(PaymentStatus.Completed, updated.PaymentStatus);
+
+        var fromDb = context.Payments.ToList();
+        Assert.Single(fromDb);
+        Assert.Equal(PaymentStatus.Completed, fromDb[0].PaymentStatus);
+    }
+
+    [Fact]
+    public void CreatingPayment_WithInvalidArgs_ThrowsValidation()
+    {
+        // Arrange & Act & Assert
+        Assert.Throws<PaymentValidationException>(() => new Payment(0, 1));
+        Assert.Throws<PaymentValidationException>(() => new Payment(10, 0));
+    }
+}

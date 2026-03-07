@@ -15,6 +15,6 @@ public class PaymentSucceededEventConsumer(INotificationService notificationServ
 
         string notificationMessage = $"Payment of {message.Amount:C} for Order {message.OrderId} succeeded on {message.PaymentDate}.";
 
-        await notificationService.SendNotification(new Notification(notificationMessage));
+        await notificationService.SendNotificationAsync(new Notification(notificationMessage));
     }
 }
