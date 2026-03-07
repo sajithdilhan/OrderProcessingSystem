@@ -5,9 +5,6 @@ using NotificationService.Api.Controllers;
 using NotificationService.Application.Dto;
 using NotificationService.Application.Interfaces;
 using Shared.Contracts.Common;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace NotificationServiceTests.Controllers;
 

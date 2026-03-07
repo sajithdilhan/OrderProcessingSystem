@@ -5,6 +5,7 @@ using NotificationService.Infrastructure.Events;
 using NotificationService.Infrastructure.Persistence;
 using NotificationService.Infrastructure.Repositories;
 using Scalar.AspNetCore;
+using Serilog;
 using Shared.Contracts.Common;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +38,15 @@ builder.Services.AddMassTransit(x =>
     });
 });
 builder.Services.AddHealthChecks();
+
+builder.Logging.ClearProviders();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

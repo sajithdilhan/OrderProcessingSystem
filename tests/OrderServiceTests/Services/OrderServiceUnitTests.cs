@@ -15,7 +15,7 @@ public class OrderServiceUnitTests
     public async Task GetAllOrders_ReturnsSuccess_WhenRepositoryHasOrders()
     {
         // Arrange
-        var order = new Order(10, "a@b.com") { OrderId = 1 };
+        var order = new Order(10, "test@test.com") { OrderId = 1 };
         var orders = new List<Order> { order };
 
         var mockRepo = new Mock<IOrderRepository>();
@@ -65,7 +65,7 @@ public class OrderServiceUnitTests
     public async Task CreateOrder_ReturnsFailure_WhenRepositoryReturnsOrderWithIdZero()
     {
         // Arrange
-        var request = new OrderRequest { CustomerEmail = "c@d.com", Amount = 20 };
+        var request = new OrderRequest { CustomerEmail = "test@test.com", Amount = 20 };
         var returnedOrder = new Order(request.Amount, request.CustomerEmail) { OrderId = 0 };
 
         var mockRepo = new Mock<IOrderRepository>();
@@ -90,7 +90,7 @@ public class OrderServiceUnitTests
     public async Task CreateOrder_PublishesEventAndReturnsSuccess_WhenRepositoryCreatesOrder()
     {
         // Arrange
-        var request = new OrderRequest { CustomerEmail = "e@f.com", Amount = 50 };
+        var request = new OrderRequest { CustomerEmail = "test@test.com", Amount = 50 };
         var createdOrder = new Order(request.Amount, request.CustomerEmail) { OrderId = 5, OrderDate = DateTime.UtcNow };
 
         var mockRepo = new Mock<IOrderRepository>();
@@ -116,7 +116,7 @@ public class OrderServiceUnitTests
     public async Task CreateOrder_ThrowsException_WhenRepositoryThrows()
     {
         // Arrange
-        var request = new OrderRequest { CustomerEmail = "x@y.com", Amount = 15 };
+        var request = new OrderRequest { CustomerEmail = "test@test.com", Amount = 15 };
 
         var mockRepo = new Mock<IOrderRepository>();
         mockRepo.Setup(r => r.CreateOrderAsync(It.IsAny<Order>())).ThrowsAsync(new Exception("DB error"));

@@ -2,10 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using NotificationService.Domain.Entities;
 using NotificationService.Infrastructure.Persistence;
 using NotificationService.Infrastructure.Repositories;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace NotificationServiceTests.Repositories;
 

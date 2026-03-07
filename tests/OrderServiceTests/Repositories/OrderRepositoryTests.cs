@@ -41,7 +41,7 @@ public class OrderRepositoryTests
         await using var context = CreateContext(dbName);
         var repo = new OrderRepository(context);
 
-        var order = new Order(25, "g@h.com");
+        var order = new Order(25, "test@test.com");
 
         // Act
         var created = await repo.CreateOrderAsync(order);
@@ -59,6 +59,6 @@ public class OrderRepositoryTests
     public void CreatingOrder_WithInvalidAmount_ThrowsValidation()
     {
         // Arrange & Act & Assert
-        Assert.Throws<OrderValidationException>(() => new Order(0, "i@j.com"));
+        Assert.Throws<OrderValidationException>(() => new Order(0, "test@test.com"));
     }
 }

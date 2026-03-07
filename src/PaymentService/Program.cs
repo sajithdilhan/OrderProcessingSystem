@@ -5,6 +5,7 @@ using PaymentService.Infrastructure.Events;
 using PaymentService.Infrastructure.Persistence;
 using PaymentService.Infrastructure.Repositories;
 using Scalar.AspNetCore;
+using Serilog;
 using Shared.Contracts.Common;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +37,15 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("payment-service.order-created", e => e.ConfigureConsumer<OrderCreatedEventConsumer>(context));
     });
 });
+builder.Logging.ClearProviders();
 builder.Services.AddHealthChecks();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
