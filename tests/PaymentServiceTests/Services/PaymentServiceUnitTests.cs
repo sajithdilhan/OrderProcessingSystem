@@ -11,8 +11,6 @@ namespace PaymentServiceTests.Services;
 
 public class PaymentServiceUnitTests
 {
-    private const string PublishArg = "publish";
-
     [Fact]
     public async Task GetAllPayments_ReturnsSuccess_WhenRepositoryHasPayments()
     {
@@ -41,7 +39,7 @@ public class PaymentServiceUnitTests
     }
 
     [Fact]
-    public async Task GetAllPayments_ReturnsFailure_WhenRepositoryReturnsNull()
+    public async Task GetAllPayments_ReturnsNotFound_WhenRepositoryReturnsEmpty()
     {
         // Arrange
         var mockRepo = new Mock<IPaymentRepository>();
@@ -128,5 +126,55 @@ public class PaymentServiceUnitTests
 
         // Act & Assert
         await Assert.ThrowsAsync<Exception>(() => service.ProcessPaymentAsync(payment));
+    }
+
+    [Fact]
+    public async Task ProcessPayment_Throws_WhenPublishThrows()
+    {
+        // Arrange
+        var payment = new Payment(50m, 10, "pub@throw.com", paymentStatus: Shared.Contracts.Enum.PaymentStatus.Pending) { PaymentId = 11 };
+
+        var mockRepo = new Mock<IPaymentRepository>();
+        mockRepo.Setup(r => r.SavePaymentAsync(It.IsAny<Payment>())).ReturnsAsync((Payment p) => p);
+        mockRepo.Setup(r => r.UpdatePaymentAsync(It.IsAny<Payment>())).ReturnsAsync((Payment p) => p);
+
+        var mockPublish = new Mock<IPublishEndpoint>();
+        mockPublish.Setup(p => p.Publish(It.IsAny<PaymentSucceededEvent>(), default)).ThrowsAsync(new Exception("publish failed"));
+
+        var mockLogger = new Mock<ILogger<ServiceType>>();
+
+        var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Exception>(() => service.ProcessPaymentAsync(payment));
+    }
+
+    [Fact]
+    public async Task ProcessPayment_SetsExternalPaymentIdAndStatus_BeforeUpdate()
+    {
+        // Arrange
+        var payment = new Payment(60m, 12, "test@test.com", paymentStatus: PaymentStatus.Pending) { PaymentId = 13 };
+
+        var mockRepo = new Mock<IPaymentRepository>();
+        mockRepo.Setup(r => r.SavePaymentAsync(It.IsAny<Payment>())).ReturnsAsync((Payment p) => p);
+
+        Payment? updatedArg = null;
+        mockRepo.Setup(r => r.UpdatePaymentAsync(It.IsAny<Payment>())).Callback<Payment>(p => updatedArg = p).ReturnsAsync((Payment p) => p);
+
+        var mockPublish = new Mock<IPublishEndpoint>();
+        mockPublish.Setup(p => p.Publish(It.IsAny<PaymentSucceededEvent>(), default)).Returns(Task.CompletedTask);
+
+        var mockLogger = new Mock<ILogger<ServiceType>>();
+
+        var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
+
+        // Act
+        var result = await service.ProcessPaymentAsync(payment);
+
+        // Assert
+        Assert.True(result);
+        Assert.NotNull(updatedArg);
+        Assert.Equal(PaymentStatus.Completed, updatedArg!.PaymentStatus);
+        Assert.NotEqual(Guid.Empty, updatedArg.ExternalPaymentId);
     }
 }

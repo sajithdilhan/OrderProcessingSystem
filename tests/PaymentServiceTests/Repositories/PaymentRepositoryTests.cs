@@ -86,4 +86,53 @@ public class PaymentRepositoryTests
         Assert.Throws<PaymentValidationException>(() => new Payment(0, 1, "test@test.com", paymentStatus: PaymentStatus.Pending));
         Assert.Throws<PaymentValidationException>(() => new Payment(10, 0, "test@test.com", paymentStatus: PaymentStatus.Pending));
     }
+
+    [Fact]
+    public void CreatingPayment_WithNegativeArgs_ThrowsValidation()
+    {
+        // Arrange & Act & Assert
+        Assert.Throws<PaymentValidationException>(() => new Payment(-1, 1, "test@test.com", paymentStatus: PaymentStatus.Pending));
+        Assert.Throws<PaymentValidationException>(() => new Payment(10, -2, "test@test.com", paymentStatus: PaymentStatus.Pending));
+    }
+
+    [Fact]
+    public async Task SavePayment_SetsPaymentDateToNow()
+    {
+        // Arrange
+        var dbName = $"payments_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new PaymentRepository(context);
+
+        var before = DateTime.UtcNow;
+        var payment = new Payment(25m, 6, "time@test.com", paymentStatus: PaymentStatus.Pending);
+
+        // Act
+        var created = await repo.SavePaymentAsync(payment);
+        var after = DateTime.UtcNow;
+
+        // Assert
+        Assert.True(created.PaymentDate >= before && created.PaymentDate <= after);
+    }
+
+    [Fact]
+    public async Task SavePayment_PersistsMultiplePayments()
+    {
+        // Arrange
+        var dbName = $"payments_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new PaymentRepository(context);
+
+        var p1 = new Payment(10m, 1, "test1@test.com", paymentStatus: PaymentStatus.Pending);
+        var p2 = new Payment(20m, 2, "test2@test.com", paymentStatus: PaymentStatus.Pending);
+
+        // Act
+        var created1 = await repo.SavePaymentAsync(p1);
+        var created2 = await repo.SavePaymentAsync(p2);
+
+        // Assert
+        var fromDb = context.Payments.ToList();
+        Assert.Equal(2, fromDb.Count);
+        Assert.Contains(fromDb, o => o.PaymentId == created1.PaymentId);
+        Assert.Contains(fromDb, o => o.PaymentId == created2.PaymentId);
+    }
 }

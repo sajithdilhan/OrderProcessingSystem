@@ -16,7 +16,7 @@ public class OrdersControllerTests
         // Arrange
         var orders = new List<OrderResponse>
         {
-            new OrderResponse { OrderId = 1, Amount = 10, CustomerEmail = "a@b.com" }
+            new OrderResponse { OrderId = 1, Amount = 10, CustomerEmail = "test@test.com" }
         };
 
         var mockService = new Mock<IOrderService>();
@@ -58,7 +58,7 @@ public class OrdersControllerTests
     public async Task CreateOrders_ReturnsCreated_WhenServiceSucceeds()
     {
         // Arrange
-        var request = new OrderRequest { CustomerEmail = "c@d.com", Amount = 20 };
+        var request = new OrderRequest { CustomerEmail = "test@test.com", Amount = 20 };
         var mockService = new Mock<IOrderService>();
         mockService.Setup(s => s.CreateOrderAsync(request)).ReturnsAsync(Result<int>.Success(123));
 
@@ -77,7 +77,7 @@ public class OrdersControllerTests
     public async Task CreateOrders_ReturnsProblem_WhenServiceFails()
     {
         // Arrange
-        var request = new OrderRequest { CustomerEmail = "c@d.com", Amount = 20 };
+        var request = new OrderRequest { CustomerEmail = "test@test.com", Amount = 20 };
         var error = new Error(400, "Bad request");
         var mockService = new Mock<IOrderService>();
         mockService.Setup(s => s.CreateOrderAsync(request)).ReturnsAsync(Result<int>.Failure(error));
@@ -93,5 +93,20 @@ public class OrdersControllerTests
         Assert.Equal(400, obj.StatusCode);
         var problem = Assert.IsType<ProblemDetails>(obj.Value);
         Assert.Equal("Bad request", problem.Detail);
+    }
+
+    [Fact]
+    public async Task CreateOrders_ThrowsException_WhenServiceThrows()
+    {
+        // Arrange
+        var request = new OrderRequest { CustomerEmail = "test@test.com", Amount = 20 };
+        var mockService = new Mock<IOrderService>();
+        mockService.Setup(s => s.CreateOrderAsync(request)).ThrowsAsync(new Exception("service error"));
+
+        var mockLogger = new Mock<ILogger<OrdersController>>();
+        var controller = new OrdersController(mockService.Object, mockLogger.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Exception>(() => controller.CreateOrders(request));
     }
 }

@@ -16,7 +16,7 @@ public class NotificationsControllerTests
         // Arrange
         var notifications = new List<NotificationResponse>
         {
-            new NotificationResponse { NotificationId = 1, Message = "Hello" }
+            new NotificationResponse { NotificationId = 1, Message = "Test Message" }
         };
 
         var mockService = new Mock<INotificationService>();

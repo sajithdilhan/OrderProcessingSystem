@@ -44,7 +44,7 @@ public class OrderServiceUnitTests
     {
         // Arrange
         var mockRepo = new Mock<IOrderRepository>();
-        mockRepo.Setup(r => r.GetAllOrdersAsync()).ReturnsAsync((IEnumerable<Order>?)null);
+        mockRepo.Setup(r => r.GetAllOrdersAsync()).ReturnsAsync(Enumerable.Empty<Order>());
 
         var mockPublish = new Mock<IPublishEndpoint>();
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -57,7 +57,7 @@ public class OrderServiceUnitTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.NotNull(result.Error);
-        Assert.Equal(400, result.Error!.Code);
+        Assert.Equal(404, result.Error!.Code);
         Assert.Equal("No orders found!", result.Error.Message);
     }
 
@@ -122,6 +122,49 @@ public class OrderServiceUnitTests
         mockRepo.Setup(r => r.CreateOrderAsync(It.IsAny<Order>())).ThrowsAsync(new Exception("DB error"));
 
         var mockPublish = new Mock<IPublishEndpoint>();
+        var mockLogger = new Mock<ILogger<ServiceType>>();
+
+        var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Exception>(() => service.CreateOrderAsync(request));
+    }
+
+    [Fact]
+    public async Task GetAllOrders_ReturnsNotFound_WhenRepositoryReturnsEmptyList()
+    {
+        // Arrange
+        var mockRepo = new Mock<IOrderRepository>();
+        mockRepo.Setup(r => r.GetAllOrdersAsync()).ReturnsAsync(Enumerable.Empty<Order>());
+
+        var mockPublish = new Mock<IPublishEndpoint>();
+        var mockLogger = new Mock<ILogger<ServiceType>>();
+
+        var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);
+
+        // Act
+        var result = await service.GetAllOrdersAsync();
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+        Assert.Equal(404, result.Error!.Code);
+        Assert.Equal("No orders found!", result.Error.Message);
+    }
+
+    [Fact]
+    public async Task CreateOrder_ThrowsException_WhenPublishEndpointThrows()
+    {
+        // Arrange
+        var request = new OrderRequest { CustomerEmail = "test@test.com", Amount = 30 };
+        var createdOrder = new Order(request.Amount, request.CustomerEmail) { OrderId = 7, OrderDate = DateTime.UtcNow };
+
+        var mockRepo = new Mock<IOrderRepository>();
+        mockRepo.Setup(r => r.CreateOrderAsync(It.IsAny<Order>())).ReturnsAsync(createdOrder);
+
+        var mockPublish = new Mock<IPublishEndpoint>();
+        mockPublish.Setup(p => p.Publish(It.IsAny<OrderCreatedEvent>(), default)).ThrowsAsync(new Exception("Publish failed"));
+
         var mockLogger = new Mock<ILogger<ServiceType>>();
 
         var service = new ServiceType(mockRepo.Object, mockPublish.Object, mockLogger.Object);

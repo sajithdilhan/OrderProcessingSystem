@@ -56,10 +56,43 @@ public class NotificationRepositoryTests
     }
 
     [Fact]
-    public void CreatingNotification_WithEmptyMessage_Allows()
+    public async Task SaveNotification_SetsCreatedAtToNow()
     {
-        // Arrange & Act
-        var n = new Notification(new PaymentSucceededEvent(1, 100m, 1, DateTime.UtcNow, "test@example.com"));
-        Assert.Equal("test@example.com", n.Message.CustomerEmail);
+        // Arrange
+        var dbName = $"notifications_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new NotificationRepository(context);
+
+        var before = DateTime.UtcNow;
+        var n = new Notification(new PaymentSucceededEvent(1, 50m, 1, DateTime.UtcNow, "time@test.com"));
+
+        // Act
+        var created = await repo.SaveNotification(n);
+        var after = DateTime.UtcNow;
+
+        // Assert
+        Assert.True(created.CreatedAt >= before && created.CreatedAt <= after);
+    }
+
+    [Fact]
+    public async Task SaveNotification_PersistsMultipleNotifications()
+    {
+        // Arrange
+        var dbName = $"notifications_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new NotificationRepository(context);
+
+        var n1 = new Notification(new PaymentSucceededEvent(1, 10m, 1, DateTime.UtcNow, "test1@test.com"));
+        var n2 = new Notification(new PaymentSucceededEvent(2, 20m, 2, DateTime.UtcNow, "test2@test.com"));
+
+        // Act
+        var created1 = await repo.SaveNotification(n1);
+        var created2 = await repo.SaveNotification(n2);
+
+        // Assert
+        var fromDb = context.Notifications.ToList();
+        Assert.Equal(2, fromDb.Count);
+        Assert.Contains(fromDb, o => o.NotificationId == created1.NotificationId);
+        Assert.Contains(fromDb, o => o.NotificationId == created2.NotificationId);
     }
 }

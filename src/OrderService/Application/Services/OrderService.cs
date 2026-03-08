@@ -12,10 +12,10 @@ public class OrderService(IOrderRepository orderRepository, IPublishEndpoint pub
     public async Task<Result<IEnumerable<OrderResponse>>> GetAllOrdersAsync()
     {
         var orders = await orderRepository.GetAllOrdersAsync();
-        if (orders is null)
+        if (!orders.Any())
         {
             logger.LogWarning("No orders found!");
-            return Result<IEnumerable<OrderResponse>>.Failure(new Error((int)HttpStatusCode.BadRequest, "No orders found!"));
+            return Result<IEnumerable<OrderResponse>>.Failure(new Error((int)HttpStatusCode.NotFound, "No orders found!"));
         }
 
         logger.LogInformation("Returning orders.");
