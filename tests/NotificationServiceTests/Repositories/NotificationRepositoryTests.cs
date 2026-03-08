@@ -95,4 +95,38 @@ public class NotificationRepositoryTests
         Assert.Contains(fromDb, o => o.NotificationId == created1.NotificationId);
         Assert.Contains(fromDb, o => o.NotificationId == created2.NotificationId);
     }
+
+    [Fact]
+    public async Task GetNotificationById_ReturnsNull_WhenNotFound()
+    {
+        // Arrange
+        var dbName = $"notifications_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new NotificationRepository(context);
+
+        // Act
+        var result = await repo.GetNotificationById(999);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetNotificationById_ReturnsNotification_WhenExists()
+    {
+        // Arrange
+        var dbName = $"notifications_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new NotificationRepository(context);
+        var notification = new Notification(new PaymentSucceededEvent(5, 100m, 10, DateTime.UtcNow, "test@test.com"));
+        await repo.SaveNotification(notification);
+
+        // Act
+        var result = await repo.GetNotificationById(5);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(5, result.Message.PaymentId);
+        Assert.Equal(100m, result.Message.Amount);
+    }
 }

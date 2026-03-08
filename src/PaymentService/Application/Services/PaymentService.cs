@@ -27,6 +27,13 @@ public class PaymentService(IPaymentRepository repository, IPublishEndpoint publ
 
     public async Task<bool> ProcessPaymentAsync(Payment payment)
     {
+        var existingPayment = await repository.GetPaymentByOrderIdAsync(payment.OrderId);
+        if (existingPayment != null) // Idempotency check
+        {
+            logger.LogWarning("Payment already exists for order ID: {OrderId}", payment.OrderId);
+            return false;
+        }
+
         await repository.SavePaymentAsync(payment);
         await CallExternalPaymentService(payment);
         await repository.UpdatePaymentAsync(payment);
@@ -42,15 +49,12 @@ public class PaymentService(IPaymentRepository repository, IPublishEndpoint publ
 
     private async Task PublishPaymentSuccessEvent(Payment payment)
     {
-        logger.LogInformation("Publishing PaymentSucceededEvent for payment ID: {PaymentId}", payment.PaymentId);
         await publishEndpoint.Publish(new PaymentSucceededEvent(payment.PaymentId, payment.Amount, payment.OrderId, payment.PaymentDate, payment.CustomerEmail));
         logger.LogInformation("PaymentSucceededEvent published for payment ID: {PaymentId}", payment.PaymentId);
     }
 
     private async Task<Payment> CallExternalPaymentService(Payment payment)
     {
-        logger.LogInformation("Calling external payment service for payment ID: {PaymentId}", payment.PaymentId);
-        Task.Delay(1000).Wait();
         logger.LogInformation("External payment service call completed for payment ID: {PaymentId}", payment.PaymentId);
         payment.PaymentStatus = PaymentStatus.Completed;
         payment.ExternalPaymentId = Guid.NewGuid();

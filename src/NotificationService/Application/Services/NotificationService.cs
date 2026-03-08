@@ -10,8 +10,6 @@ public class NotificationService(INotificationRepository notificationRepository,
 {
     public async Task<Result<IEnumerable<NotificationResponse>>> GetAllNotificationsAsync()
     {
-        logger.LogInformation("Fetching all notifications");
-
         var notifications = await notificationRepository.GetAllNotifications();
         if (!notifications.Any())
         {
@@ -19,17 +17,22 @@ public class NotificationService(INotificationRepository notificationRepository,
             return Result<IEnumerable<NotificationResponse>>.Failure(new Error((int)HttpStatusCode.NotFound, "No notifications found!"));
         }
 
-        logger.LogInformation("Returning notifications.");
         var dtos = notifications.Select(n => NotificationResponse.ToDto(n));
         return Result<IEnumerable<NotificationResponse>>.Success(dtos);
     }
 
     public async Task SendNotificationAsync(Notification notification)
     {
+        var existingNotification = await notificationRepository.GetNotificationById(notification.Message?.PaymentId);
+        if (existingNotification != null) // Idempotency check
+        {
+            logger.LogWarning("Notification already exists for notification ID: {NotificationId}", notification.NotificationId);
+            return;
+        }
+
         await notificationRepository.SaveNotification(notification);
-        logger.LogInformation("Notification saved to repository with ID: {NotificationId}", notification.NotificationId);
-        string message = $"Payment of {notification.Message.Amount:C} for Order {notification.Message.OrderId} succeeded.";
-        logger.LogInformation("Sending notification: {Message} to {CustomerEmail}", message, notification.Message.CustomerEmail);
+        string message = $"Payment of {notification.Message?.Amount:C} for Order {notification.Message?.OrderId} succeeded.";
+        logger.LogInformation("Sending notification: {Message} to {CustomerEmail}", message, notification.Message?.CustomerEmail);
         await Task.CompletedTask;
     }
 }

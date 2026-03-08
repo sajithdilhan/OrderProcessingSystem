@@ -20,6 +20,11 @@ public class NotificationRepository : INotificationRepository
        return await _context.Notifications.AsNoTracking().ToListAsync();
     }
 
+    public async Task<Notification?> GetNotificationById(int? paymentId)
+    {
+        return await _context.Notifications.AsNoTracking().SingleOrDefaultAsync(n => n.Message.PaymentId == paymentId);
+    }
+
     public async Task<Notification> SaveNotification(Notification notification)
     {
         _context.Notifications.Add(notification);

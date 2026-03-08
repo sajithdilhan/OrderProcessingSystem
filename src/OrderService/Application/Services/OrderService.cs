@@ -33,11 +33,9 @@ public class OrderService(IOrderRepository orderRepository, IPublishEndpoint pub
             return Result<int>.Failure(new Error((int)HttpStatusCode.InternalServerError, "Failed to create order."));
         }
 
-        logger.LogInformation("Publishing order created event: {OrderId}", order.OrderId);
         await publishEndpoint.Publish(new OrderCreatedEvent(order.OrderId, order.Amount, order.CustomerEmail, order.OrderDate));
-        logger.LogInformation("published event: {OrderId}", order.OrderId);
 
-        logger.LogInformation("Order created successfully for customer:{CustomerEmail}", request.CustomerEmail);
+        logger.LogInformation("Order: {OrderId} created successfully for customer:{CustomerEmail}", order.OrderId, request.CustomerEmail);
         return Result<int>.Success(order.OrderId);
     }
 }

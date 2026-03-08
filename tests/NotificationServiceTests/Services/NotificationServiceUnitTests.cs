@@ -63,6 +63,7 @@ public class NotificationServiceUnitTests
         var notification = new Notification(new PaymentSucceededEvent(1, 100m, 1, DateTime.UtcNow, "test@example.com")) { NotificationId = 0 };
 
         var mockRepo = new Mock<INotificationRepository>();
+        mockRepo.Setup(r => r.GetNotificationById(It.IsAny<int?>())).ReturnsAsync((Notification?)null);
         mockRepo.Setup(r => r.SaveNotification(It.IsAny<Notification>())).ReturnsAsync((Notification n) => { n.NotificationId = 2; return n; });
 
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -82,6 +83,7 @@ public class NotificationServiceUnitTests
         var notification = new Notification(new PaymentSucceededEvent(1, 100m, 1, DateTime.UtcNow, "test@example.com")) { NotificationId = 0 };
 
         var mockRepo = new Mock<INotificationRepository>();
+        mockRepo.Setup(r => r.GetNotificationById(It.IsAny<int?>())).ReturnsAsync((Notification?)null);
         mockRepo.Setup(r => r.SaveNotification(It.IsAny<Notification>())).ThrowsAsync(new Exception("DB error"));
 
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -98,6 +100,7 @@ public class NotificationServiceUnitTests
         var notification = new Notification(new PaymentSucceededEvent(2, 200m, 2, DateTime.UtcNow, "assign@test.com")) { NotificationId = 0 };
 
         var mockRepo = new Mock<INotificationRepository>();
+        mockRepo.Setup(r => r.GetNotificationById(It.IsAny<int?>())).ReturnsAsync((Notification?)null);
         mockRepo.Setup(r => r.SaveNotification(It.IsAny<Notification>())).ReturnsAsync((Notification n) => { n.NotificationId = 5; return n; });
 
         var mockLogger = new Mock<ILogger<ServiceType>>();
@@ -109,5 +112,25 @@ public class NotificationServiceUnitTests
         // Assert
         Assert.Equal(5, notification.NotificationId);
         mockRepo.Verify(r => r.SaveNotification(It.IsAny<Notification>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task SendNotification_DoesNotSave_WhenNotificationAlreadyExists()
+    {
+        // Arrange
+        var existingNotification = new Notification(new PaymentSucceededEvent(3, 150m, 3, DateTime.UtcNow, "test@test.com")) { NotificationId = 1 };
+        var newNotification = new Notification(new PaymentSucceededEvent(3, 150m, 3, DateTime.UtcNow, "test@test.com"));
+
+        var mockRepo = new Mock<INotificationRepository>();
+        mockRepo.Setup(r => r.GetNotificationById(3)).ReturnsAsync(existingNotification);
+
+        var mockLogger = new Mock<ILogger<ServiceType>>();
+        var service = new ServiceType(mockRepo.Object, mockLogger.Object);
+
+        // Act
+        await service.SendNotificationAsync(newNotification);
+
+        // Assert
+        mockRepo.Verify(r => r.SaveNotification(It.IsAny<Notification>()), Times.Never);
     }
 }

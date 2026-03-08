@@ -34,7 +34,12 @@ builder.Services.AddMassTransit(x =>
                      h.Username(rabbitSettings.Username);
                      h.Password(rabbitSettings.Password);
                  });
-        cfg.ReceiveEndpoint("payment-service.order-created", e => e.ConfigureConsumer<OrderCreatedEventConsumer>(context));
+        cfg.ReceiveEndpoint("payment-service.order-created", e =>
+        {
+            e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+
+            e.ConfigureConsumer<OrderCreatedEventConsumer>(context);
+        });
     });
 });
 builder.Logging.ClearProviders();

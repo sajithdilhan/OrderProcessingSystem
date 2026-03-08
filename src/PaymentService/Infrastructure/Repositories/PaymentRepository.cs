@@ -19,6 +19,11 @@ public class PaymentRepository : IPaymentRepository
         return await _context.Payments.AsNoTracking().ToListAsync();
     }
 
+    public async Task<Payment?> GetPaymentByOrderIdAsync(int orderId)
+    {
+        return await _context.Payments.AsNoTracking().SingleOrDefaultAsync(p => p.OrderId == orderId);
+    }
+
     public async Task<Payment> SavePaymentAsync(Payment payment)
     {
         _context.Payments.Add(payment);

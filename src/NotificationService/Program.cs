@@ -34,7 +34,12 @@ builder.Services.AddMassTransit(x =>
                      h.Username(rabbitSettings.Username);
                      h.Password(rabbitSettings.Password);
                  });
-        cfg.ReceiveEndpoint("notification-service.payment-succeeded", e => e.ConfigureConsumer<PaymentSucceededEventConsumer>(context));
+        cfg.ReceiveEndpoint("notification-service.payment-succeeded", e =>
+        {
+            e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+
+            e.ConfigureConsumer<PaymentSucceededEventConsumer>(context);
+        });
     });
 });
 builder.Services.AddHealthChecks();

@@ -135,4 +135,38 @@ public class PaymentRepositoryTests
         Assert.Contains(fromDb, o => o.PaymentId == created1.PaymentId);
         Assert.Contains(fromDb, o => o.PaymentId == created2.PaymentId);
     }
+
+    [Fact]
+    public async Task GetPaymentByOrderId_ReturnsNull_WhenNotFound()
+    {
+        // Arrange
+        var dbName = $"payments_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new PaymentRepository(context);
+
+        // Act
+        var result = await repo.GetPaymentByOrderIdAsync(999);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetPaymentByOrderId_ReturnsPayment_WhenExists()
+    {
+        // Arrange
+        var dbName = $"payments_{Guid.NewGuid()}";
+        await using var context = CreateContext(dbName);
+        var repo = new PaymentRepository(context);
+        var payment = new Payment(50m, 10, "test@test.com", paymentStatus: PaymentStatus.Pending);
+        await repo.SavePaymentAsync(payment);
+
+        // Act
+        var result = await repo.GetPaymentByOrderIdAsync(10);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(10, result.OrderId);
+        Assert.Equal(50m, result.Amount);
+    }
 }
