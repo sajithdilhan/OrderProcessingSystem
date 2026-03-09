@@ -31,7 +31,8 @@ public class NotificationService(INotificationRepository notificationRepository,
         }
 
         await notificationRepository.SaveNotification(notification);
-        string message = $"Payment of {notification.Message?.Amount:C} for Order {notification.Message?.OrderId} succeeded.";
+        var formattedAmount = notification.Message?.Amount.ToString("C");
+        string message = $"Payment of {formattedAmount} for Order {notification.Message?.OrderId} succeeded.";
         logger.LogInformation("Sending notification: {Message} to {CustomerEmail}", message, notification.Message?.CustomerEmail);
         await Task.CompletedTask;
     }

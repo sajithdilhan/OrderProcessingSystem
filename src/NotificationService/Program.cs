@@ -7,6 +7,11 @@ using NotificationService.Infrastructure.Repositories;
 using Scalar.AspNetCore;
 using Serilog;
 using Shared.Contracts.Common;
+using System.Globalization;
+
+var culture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 var builder = WebApplication.CreateBuilder(args);
 
