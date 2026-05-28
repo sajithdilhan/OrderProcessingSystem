@@ -86,3 +86,4 @@ Start all services and infrastructure using Docker Compose.
 - Payment Service: ```http://localhost:5002/scalar/```
 - Notification Service: ```http://localhost:5003/scalar/```
 
+![example branch parameter.](https://github.com/mona/special-octo-eureka/actions/workflows/grading.yml/badge.svg?branch=main)
